@@ -1,0 +1,10 @@
+title       = "geojs"
+baseURL     = "https://geojs-cli.tamnd.com/"
+description = "A command line for geojs."
+contentDir  = "content"
+outputDir   = "public"
+theme       = "tago-doks"
+syntaxHighlight = "true"
+
+[params]
+github = "https://github.com/tamnd/geojs-cli"
