@@ -1,10 +1,10 @@
 # geojs
 
-A command line for geojs.
+IP geolocation and public-IP lookup via [get.geojs.io](https://get.geojs.io/).
 
-`geojs` is a single pure-Go binary. It reads public geojs data
-over plain HTTPS, shapes it into clean records, and prints output that pipes
-into the rest of your tools. No API key, nothing to run alongside it.
+`geojs` is a single pure-Go binary. It reads public GeoJS data over plain
+HTTPS, shapes it into clean records, and prints output that pipes into the rest
+of your tools. No API key, nothing to run alongside it.
 
 The same package is also a [resource-URI driver](#use-it-as-a-resource-uri-driver),
 so a host program like [ant](https://github.com/tamnd/ant) can address
@@ -26,11 +26,11 @@ docker run --rm ghcr.io/tamnd/geojs:latest --help
 ## Usage
 
 ```bash
-geojs page <path>                      # fetch one page as a record
-geojs page <path> -o json              # as JSON, ready for jq
-geojs page <path> --template '{{.Body}}'  # just the readable body text
-geojs links <path>                     # the pages it links to, one per line
-geojs --help                           # the whole command tree
+geojs lookup              # geo info for your own IP
+geojs lookup 8.8.8.8     # geo info for a specific IP
+geojs myip               # just your public IP address
+geojs lookup 8.8.8.8 -o json   # as JSON, ready for jq
+geojs --help             # the whole command tree
 ```
 
 Every command shares one output contract: `-o table|json|jsonl|csv|tsv|url|raw`,
@@ -38,10 +38,12 @@ Every command shares one output contract: `-o table|json|jsonl|csv|tsv|url|raw`,
 The default adapts to where output goes (a table on a terminal, JSONL in a
 pipe), so the same command reads well by hand and parses cleanly downstream.
 
-This is a fresh scaffold. It ships one example resource type, `page`, wired end
-to end. Model the real geojs records in `geojs/` and declare their
-operations in `geojs/domain.go`; each one becomes a command, an HTTP
-route, and an MCP tool at once.
+## Commands
+
+| Command | Description |
+|---|---|
+| `geojs lookup [ip]` | Geo lookup for your IP or a specified IP |
+| `geojs myip` | Get your public IP address |
 
 ## Serve it
 
@@ -49,7 +51,7 @@ The same operations are available over HTTP and as an MCP tool set for agents,
 with no extra code:
 
 ```bash
-geojs serve --addr :7777    # GET /v1/page/<path>  returns NDJSON
+geojs serve --addr :7777    # GET /v1/lookup  returns NDJSON
 geojs mcp                   # speak MCP over stdio
 ```
 
@@ -66,19 +68,17 @@ Then [ant](https://github.com/tamnd/ant) (or any program that links the package)
 dereferences `geojs://` URIs without knowing anything about geojs:
 
 ```bash
-ant get geojs://page/<path>   # fetch the record
-ant cat geojs://page/<path>   # just the body text
-ant ls  geojs://page/<path>   # the pages it links to, each addressable
-ant url geojs://page/<path>   # the live https URL
+ant get geojs://geoinfo/8.8.8.8   # fetch the record
+ant url geojs://geoinfo/8.8.8.8   # the live https URL
 ```
 
 ## Development
 
 ```
 cmd/geojs/   thin main: hands cli.NewApp to kit.Run
-cli/                 assembles the kit App from the geojs domain
-geojs/                the library: HTTP client, data models, and domain.go (the driver)
-docs/                tago documentation site
+cli/         assembles the kit App from the geojs domain
+geojs/       the library: HTTP client, data models, and domain.go (the driver)
+docs/        tago documentation site
 ```
 
 ```bash
